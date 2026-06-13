@@ -1,15 +1,27 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
+import ToDoApp
 from ToDoApp.routers import admin, auth, todos, users
-import ToDoApp.models
+from ToDoApp.models import Base
 from ToDoApp.database import engine
 
 
 
-app = FastAPI()
+# Wrap database creation inside a clean lifespan manager (Runs ONCE when the server boots up)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # This runs ONLY when you execute 'uvicorn main:app --reload' or 'pytest' command, it doesn't run when you import the app in test files
+    # Create the database tables based on the models defined in models.py
+    # The database schema is created when the application starts, it doesn't run if the table exists already
+    Base.metadata.create_all(bind=engine)
+    yield
+    # Clean up actions can go here if needed
 
-# Create the database tables based on the models defined in models.py
-# The database schema is created when the application starts, it doesn't run if the table exists already
-ToDoApp.models.Base.metadata.create_all(bind=engine)
+
+# Pass the lifespan manager into the app instantiating line, so the database tables are only created 
+# when the server starts up, and not when the app is imported in test files
+app = FastAPI(lifespan=lifespan)
+
 
 @app.get("/healthy")
 def health_check():
