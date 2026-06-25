@@ -45,7 +45,7 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(min_length=6)
 
 
-@router.post("/", status_code=status.HTTP_200_OK) 
+@router.get("/", status_code=status.HTTP_200_OK) 
 async def get_user(db: db_dependency, user: user_dependency):
   credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
