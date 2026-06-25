@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status, Request
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.templating import Jinja2Templates
+from pathlib import Path as FilePath
 from pydantic import BaseModel, Field
 from ToDoApp.models import Users
 from ToDoApp.database import SessionLocal
@@ -7,7 +10,6 @@ from typing import Annotated
 from passlib.context import CryptContext
 from sqlite3 import IntegrityError
 from starlette import status
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from datetime import timedelta, datetime, timezone
 
@@ -52,7 +54,29 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
+BASE_DIR = FilePath(__file__).resolve().parent.parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
+
+### PAGES ###
+@router.get("/login-page")
+def render_login_page(request: Request):
+  return templates.TemplateResponse(
+    request=request,
+    name="login.html",
+    context={"request": request}
+  )
+
+@router.get("/register-page")
+def render_register_page(request: Request):
+  return templates.TemplateResponse(
+    request=request,
+    name="register.html",
+    context={"request": request}
+  )
+
+
+### ENDPOINTS ###
 def authenticate_user(db: db_dependency, 
                       username: Annotated[str, Path(description="The username of the user to authenticate", min_length=3)], 
                       password: Annotated[str, Path(description="The password of the user to authenticate", min_length=6)]):

@@ -1,10 +1,11 @@
 import ToDoApp.main
+from ToDoApp.main import app
 # print(main.__file__)
 from fastapi.testclient import TestClient
 from fastapi import status
 
 
-client = TestClient(ToDoApp.main.app)
+client = TestClient(app)
 
 
 # def test_health_check():
@@ -14,5 +15,5 @@ client = TestClient(ToDoApp.main.app)
 
 def test_routes():
     print(ToDoApp.main.__file__)
-    print([route.path for route in ToDoApp.main.app.routes])
+    print([route.path for route in app.routes])
 
